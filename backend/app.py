@@ -44,11 +44,46 @@ async def ask_mistral(request: PromptRequest):
     except Exception as e:
         return {"error": str(e)}
 
+@app.post("/read_file/")
+async def read_file(file_path: str):
+    """ Lit un fichier et retourne son contenu. """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return {"content": content}
+    except Exception as e:
+        return {"error": str(e)}
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Bonjour, {name} !"}
+@app.post("/run_command/")
+async def run_command(command: str):
+    """ Exécute une commande sur le PC (attention à la sécurité). """
+    import subprocess
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return {"output": result.stdout, "error": result.stderr}
 
 @app.get("/status")
 async def get_status():
     return {"status": "Tout fonctionne correctement !"}
+
+
+class SearchRequest(BaseModel):
+    query: str
+
+@app.post("/search_web/")
+async def search_web(request: SearchRequest):
+    """ Effectue une recherche sur le web et retourne les premiers résultats. """
+    try:
+        search_url = f"https://api.duckduckgo.com/?q={request.query}&format=json"
+        response = requests.get(search_url)
+        data = response.json()
+        
+        # Extraire les premiers résultats
+        results = [
+            {"title": item["Text"], "url": item["FirstURL"]}
+            for item in data.get("RelatedTopics", [])
+            if "Text" in item and "FirstURL" in item
+        ]
+
+        return {"results": results[:5]}  # Limite à 5 résultats
+    except Exception as e:
+        return {"error": str(e)}

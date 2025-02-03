@@ -20,4 +20,15 @@ function App() {
   );
 }
 
+async function searchWeb(query) {
+  const response = await fetch(`${API_URL}/search_web/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  const data = await response.json();
+  console.log("Résultats de la recherche :", data.results);
+}
+
+
 export default App;
