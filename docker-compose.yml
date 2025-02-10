@@ -6,9 +6,11 @@ services:
       context: ./backend
     ports:
       - "8000:8000"
+      - "8001:8001"  # Port du sous-agent
     volumes:
       - ./backend:/app
     environment:
+      - TEXT_GEN_URL=http://backend:8001/generate
       - OLLAMA_HOST=http://ollama:11434
       - MISTRAL_SYSTEM_PROMPT=Tu es un assistant francophone. Réponds uniquement en français.
     depends_on:
